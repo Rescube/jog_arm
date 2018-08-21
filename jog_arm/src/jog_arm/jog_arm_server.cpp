@@ -80,7 +80,7 @@ JogROSInterface::JogROSInterface()
   int rc = pthread_create(&joggingThread, nullptr, jog_arm::JogROSInterface::joggingPipeline, this);
   if (rc)
   {
-    ROS_FATAL_NAMED(NODE_NAME, "Creating pipeline thread failed", rc);
+    ROS_FATAL_NAMED(NODE_NAME, "Creating pipeline thread failed %d", rc);
     return;
   }
 
@@ -89,7 +89,7 @@ JogROSInterface::JogROSInterface()
   rc = pthread_create(&collisionThread, nullptr, jog_arm::JogROSInterface::collisionCheck, this);
   if (rc)
   {
-    ROS_FATAL_NAMED(NODE_NAME, "Creating collision check thread failed", rc);
+    ROS_FATAL_NAMED(NODE_NAME, "Creating collision check thread failed %d", rc);
     return;
   }
 
@@ -233,7 +233,8 @@ JogCalcs::JogCalcs(const jog_arm_parameters& parameters, jog_arm_shared& shared_
   robot_model_loader::RobotModelLoader model_loader("robot_description");
   const robot_model::RobotModelPtr& kinematic_model = model_loader.getModel();
 
-  kinematic_state_ = std::make_shared<robot_state::RobotState>(kinematic_model);
+  // kinetic only kinematic_state_ = std::make_shared<robot_state::RobotState>(kinematic_model);
+  kinematic_state_ = boost::shared_ptr<robot_state::RobotState>(new robot_state::RobotState(kinematic_model));
   kinematic_state_->setToDefaultValues();
 
   joint_model_group_ = kinematic_model->getJointModelGroup(parameters_.move_group_name);

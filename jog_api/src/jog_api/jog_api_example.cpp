@@ -77,7 +77,7 @@ int main(int argc, char** argv)
   ////////////////////////////////////////////
   // Get robot's current pose via MoveIt's api
   ////////////////////////////////////////////
-  moveit::planning_interface::MoveGroupInterface mgi(move_group_name);
+  moveit::planning_interface::MoveGroup mgi(move_group_name);
   geometry_msgs::PoseStamped current_pose = mgi.getCurrentPose();
 
   ROS_INFO_STREAM("Current pose: " << current_pose);

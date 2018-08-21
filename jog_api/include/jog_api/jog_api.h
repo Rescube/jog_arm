@@ -36,7 +36,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <geometry_msgs/WrenchStamped.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/move_group_interface/move_group.h>
 #include <ros/ros.h>
 #include <std_msgs/Float64.h>
 #include <tf/transform_listener.h>
@@ -65,7 +65,7 @@ private:
   ros::NodeHandle nh_;
 
   // Used to retrieve the current robot pose, etc.
-  moveit::planning_interface::MoveGroupInterface move_group_;
+  moveit::planning_interface::MoveGroup move_group_;
 
   ros::Publisher jog_vel_pub_;
 

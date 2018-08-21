@@ -46,7 +46,7 @@
 #include <Eigen/Eigenvalues>
 #include <geometry_msgs/Twist.h>
 #include <jog_msgs/JogJoint.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/move_group_interface/move_group.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -191,7 +191,7 @@ public:
 protected:
   ros::NodeHandle nh_;
 
-  moveit::planning_interface::MoveGroupInterface move_group_;
+  moveit::planning_interface::MoveGroup move_group_;
 
   sensor_msgs::JointState incoming_jts_;
 
