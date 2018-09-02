@@ -133,8 +133,8 @@ JogROSInterface::JogROSInterface()
     }
     else
     {
-      ROS_WARN_STREAM_THROTTLE_NAMED(2, NODE_NAME, "Stale joint "
-                                                   "trajectory msg. Try a larger "
+      ROS_WARN_STREAM_THROTTLE_NAMED(2, NODE_NAME, "Stale twist "
+                                                   "trajectory msg. ( " << shared_variables_.new_traj.header.stamp << " instead " << ros::Time::now() << " ) Try a larger "
                                                    "'incoming_command_timeout' parameter.");
       ROS_WARN_STREAM_THROTTLE_NAMED(2, NODE_NAME, "Did input from the "
                                                    "controller get interrupted? Are "
@@ -439,6 +439,8 @@ bool JogCalcs::cartesianJogCalcs(const geometry_msgs::TwistStamped& cmd, jog_arm
   geometry_msgs::TwistStamped twist_cmd;
   twist_cmd.header.stamp = cmd.header.stamp;
   twist_cmd.header.frame_id = parameters_.planning_frame;
+  ROS_INFO_STREAM_NAMED(NODE_NAME, "Time: " << cmd.header.stamp.sec << " Linear: " << lin_vector.vector << " Angular: " << rot_vector.vector );
+
   twist_cmd.twist.linear = lin_vector.vector;
   twist_cmd.twist.angular = rot_vector.vector;
 
@@ -451,7 +453,7 @@ bool JogCalcs::cartesianJogCalcs(const geometry_msgs::TwistStamped& cmd, jog_arm
   // Convert from cartesian commands to joint commands
   Eigen::MatrixXd old_jacobian = kinematic_state_->getJacobian(joint_model_group_);
   Eigen::VectorXd delta_theta = pseudoInverse(old_jacobian) * delta_x;
-
+  ROS_WARN_STREAM_NAMED(NODE_NAME, "");
   if (!addJointIncrements(jt_state_, delta_theta))
     return 0;
 
@@ -507,9 +509,10 @@ bool JogCalcs::jointJogCalcs(const jog_msgs::JogJoint& cmd, jog_arm_shared& shar
   kinematic_state_->setVariableValues(jt_state_);
   orig_jts_ = jt_state_;
 
-  if (!addJointIncrements(jt_state_, delta))
-    return 0;
-
+  if (!addJointIncrements(jt_state_, delta)) {
+      ROS_WARN_STREAM_NAMED(NODE_NAME, "addJointIncrements failed.");
+      return 0;
+  }
   // Include a velocity estimate for velocity-controlled robots
   Eigen::VectorXd joint_vel(delta / parameters_.publish_period);
 
@@ -526,6 +529,7 @@ bool JogCalcs::jointJogCalcs(const jog_msgs::JogJoint& cmd, jog_arm_shared& shar
   if (!checkIfImminentCollision(shared_variables) || !checkIfJointsWithinBounds(new_traj_))
   {
     avoidIssue(new_traj_);
+    ROS_WARN_STREAM_NAMED(NODE_NAME, "avoidIssue");
     publishWarning(true);
   }
   else
@@ -713,7 +717,8 @@ bool JogCalcs::checkIfJointsWithinBounds(trajectory_msgs::JointTrajectory& new_j
     {
       ROS_WARN_STREAM_THROTTLE_NAMED(2, NODE_NAME, ros::this_node::getName() << " " << joint->getName()
                                                                              << " close to a "
-                                                                                " position limit. Halting.");
+                                                                                " position limit. Halting."
+                                                                                << joint);
       halting = true;
     }
   }
